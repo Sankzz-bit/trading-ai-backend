@@ -1,14 +1,31 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import requests
+
+# ✅ CREATE APP FIRST
+app = FastAPI()
+
+# ✅ Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ✅ Root route
+@app.get("/")
+def home():
+    return {"message": "Trading AI Backend Running 🚀"}
+
+# ✅ Analysis route
 @app.get("/api/analysis")
 def get_analysis():
     try:
-        import requests
-
         url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ENSEI"
         response = requests.get(url, timeout=5)
 
         data = response.json()
-
-        # Safe extraction
         result = data.get("quoteResponse", {}).get("result", [])
 
         if not result:
@@ -16,7 +33,6 @@ def get_analysis():
 
         nifty_price = result[0].get("regularMarketPrice", 0)
 
-        # Trading logic
         resistance = nifty_price + 50
         support = nifty_price - 50
 
