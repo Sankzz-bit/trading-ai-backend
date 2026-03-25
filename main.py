@@ -1,52 +1,41 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-# Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Root route
-@app.get("/")
-def home():
-    return {"message": "Trading AI Backend Running 🚀"}
-
-# Analysis route
 @app.get("/api/analysis")
 def get_analysis():
 
-    # Demo price (temporary)
-    nifty_price = 22450
+    try:
+        # Real NIFTY data
+        url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ENSEI"
+        response = requests.get(url)
+        data = response.json()
 
-    # Trading zones
-    resistance = 22500
-    support = 22300
+        nifty_price = data["quoteResponse"]["result"][0]["regularMarketPrice"]
 
-    if nifty_price > resistance:
-        bias = "Strong Bullish"
-        action = "BUY CALL 🚀"
-        reason = "Breakout above resistance"
+        # Trading zones
+        resistance = nifty_price + 50
+        support = nifty_price - 50
 
-    elif nifty_price < support:
-        bias = "Strong Bearish"
-        action = "BUY PUT 🔻"
-        reason = "Breakdown below support"
+        if nifty_price > resistance:
+            bias = "Strong Bullish"
+            action = "BUY CALL 🚀"
+            reason = "Breakout above resistance"
 
-    else:
-        bias = "Sideways"
-        action = "NO TRADE ⚠️"
-        reason = f"Price between {support} and {resistance}"
+        elif nifty_price < support:
+            bias = "Strong Bearish"
+            action = "BUY PUT 🔻"
+            reason = "Breakdown below support"
 
-    return {
-        "market": "NIFTY 50",
-        "price": nifty_price,
-        "bias": bias,
-        "confidence": 85,
-        "action": action,
-        "reason": reason
-    }
+        else:
+            bias = "Sideways"
+            action = "NO TRADE ⚠️"
+            reason = "Market in range"
+
+        return {
+            "market": "NIFTY 50",
+            "price": nifty_price,
+            "bias": bias,
+            "confidence": 88,
+            "action": action,
+            "reason": reason
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
