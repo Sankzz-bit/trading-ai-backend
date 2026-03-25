@@ -1,56 +1,52 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-import requests
+# Store previous price (simple memory)
+previous_price = 0
 
-# ✅ CREATE APP FIRST
-app = FastAPI()
-
-# ✅ Enable CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ✅ Root route
-@app.get("/")
-def home():
-    return {"message": "Trading AI Backend Running 🚀"}
-
-# ✅ Analysis route
 @app.get("/api/analysis")
 def get_analysis():
+    global previous_price
+
     try:
         url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ENSEI"
-        response = requests.get(url, timeout=5)
+        headers = {"User-Agent": "Mozilla/5.0"}
+
+        response = requests.get(url, headers=headers, timeout=5)
+
+        if response.status_code != 200:
+            return {"error": "API not responding"}
 
         data = response.json()
         result = data.get("quoteResponse", {}).get("result", [])
 
         if not result:
-            return {"error": "No data from API"}
+            return {"error": "No data"}
 
         nifty_price = result[0].get("regularMarketPrice", 0)
 
-        resistance = nifty_price + 50
-        support = nifty_price - 50
+        # 🔥 TREND LOGIC
+        if previous_price == 0:
+            trend = "Neutral"
+        elif nifty_price > previous_price:
+            trend = "Uptrend 📈"
+        elif nifty_price < previous_price:
+            trend = "Downtrend 📉"
+        else:
+            trend = "Sideways"
 
-        if nifty_price > resistance:
-            bias = "Bullish"
+        previous_price = nifty_price
+
+        # 🔥 SMART DECISION
+        if trend == "Uptrend 📈":
             action = "BUY CALL 🚀"
-        elif nifty_price < support:
-            bias = "Bearish"
+        elif trend == "Downtrend 📉":
             action = "BUY PUT 🔻"
         else:
-            bias = "Sideways"
-            action = "NO TRADE ⚠️"
+            action = "WAIT ⚠️"
 
         return {
             "market": "NIFTY 50",
             "price": nifty_price,
-            "bias": bias,
-            "confidence": 85,
+            "trend": trend,
+            "confidence": 80,
             "action": action
         }
 
