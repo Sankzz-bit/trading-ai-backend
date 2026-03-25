@@ -1,50 +1,33 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-app = FastAPI()
-
-# CORS (important for frontend)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Root route
-@app.get("/")
-def home():
-    return {"message": "Trading AI Backend Running 🚀"}
-
-# Analysis route
 @app.get("/api/analysis")
 def get_analysis():
 
-   # Trading zones
-resistance = 22500
-support = 22300
+    # ✅ Temporary demo price (until we connect real API)
+    nifty_price = 22450
 
-if nifty_price > resistance:
-    bias = "Strong Bullish"
-    action = "BUY CALL 🚀"
-elif nifty_price < support:
-    bias = "Strong Bearish"
-    action = "BUY PUT 🔻"
-else:
-    bias = "Sideways"
-    action = "NO TRADE ⚠️"   # simulated value
+    # Trading zones
+    resistance = 22500
+    support = 22300
 
-    if nifty_price > 22000:
-        bias = "Bullish"
-        action = "BUY CALL"
+    if nifty_price > resistance:
+        bias = "Strong Bullish"
+        action = "BUY CALL 🚀"
+        reason = "Breakout above resistance"
+
+    elif nifty_price < support:
+        bias = "Strong Bearish"
+        action = "BUY PUT 🔻"
+        reason = "Breakdown below support"
+
     else:
-        bias = "Bearish"
-        action = "BUY PUT"
+        bias = "Sideways"
+        action = "NO TRADE ⚠️"
+        reason = f"Price between {support} and {resistance}"
 
     return {
         "market": "NIFTY 50",
         "price": nifty_price,
         "bias": bias,
-        "confidence": 82,
-        "action": action
+        "confidence": 85,
+        "action": action,
+        "reason": reason
     }
