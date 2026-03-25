@@ -1,7 +1,26 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI()
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Root route
+@app.get("/")
+def home():
+    return {"message": "Trading AI Backend Running 🚀"}
+
+# Analysis route
 @app.get("/api/analysis")
 def get_analysis():
 
-    # ✅ Temporary demo price (until we connect real API)
+    # Demo price (temporary)
     nifty_price = 22450
 
     # Trading zones
