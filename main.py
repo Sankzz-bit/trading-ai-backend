@@ -20,7 +20,19 @@ def home():
 @app.get("/api/analysis")
 def get_analysis():
 
-    nifty_price = 22450  # simulated value
+   # Trading zones
+resistance = 22500
+support = 22300
+
+if nifty_price > resistance:
+    bias = "Strong Bullish"
+    action = "BUY CALL 🚀"
+elif nifty_price < support:
+    bias = "Strong Bearish"
+    action = "BUY PUT 🔻"
+else:
+    bias = "Sideways"
+    action = "NO TRADE ⚠️"   # simulated value
 
     if nifty_price > 22000:
         bias = "Bullish"
