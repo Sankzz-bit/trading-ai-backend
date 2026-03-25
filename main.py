@@ -14,21 +14,14 @@ app.add_middleware(
 @app.get("/api/analysis")
 def get_analysis():
     try:
-        url = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
-        
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept-Language": "en-US,en;q=0.9"
-        }
-
-        session = requests.Session()
-        session.get("https://www.nseindia.com", headers=headers)
-        response = session.get(url, headers=headers)
+        # Using free public API (no blocking)
+        url = "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5ENSEI"
+        response = requests.get(url)
         data = response.json()
 
-        nifty_price = data["records"]["underlyingValue"]
+        nifty_price = data["quoteResponse"]["result"][0]["regularMarketPrice"]
 
-        # Simple AI logic
+        # AI logic
         if nifty_price > 22000:
             bias = "Bullish"
             action = "BUY CALL"
@@ -40,7 +33,7 @@ def get_analysis():
             "market": "NIFTY 50",
             "price": nifty_price,
             "bias": bias,
-            "confidence": 75,
+            "confidence": 80,
             "action": action
         }
 
